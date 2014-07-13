@@ -24,19 +24,20 @@ from moviegif import Video, spg, get_size_mb, avg_time
 
 def load_presets(settings, preset):
 
-    kwargs = dict()  # Prevents an annoying warning.
     if preset == 'tumblr':
-        from presets import tumblr_presets
-        kwargs = tumblr_presets
+        from presets import tumblr_presets as kwargs
+    elif preset == 'imgurfree':
+        from presets import imgurfree_presets as kwargs
+    else:
+        kwargs = settings
 
     kwargs['text'] = settings['text']
     kwargs['build'] = settings['build']
-    kwargs['decrement'] = settings['decrement']
 
     return kwargs
 
 @arg('video_file', help='Path to video file.')
-@arg('-p', '--preset', choices=['tumblr', 'imgur'], help='Preset settings type to use.')
+@arg('-p', '--preset', choices=['tumblr', 'imgurfree'], help='Preset settings type to use.')
 @arg('-t', '--text', help='Text string to overlay on created gifs.')
 @arg('-x', '--targetsize', help='Max size, in MB, to make the created gifs.', default=2)
 @arg('-w', '--width', help='Width, in px, to resize the created gifs to.', default=350)
