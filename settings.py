@@ -6,8 +6,6 @@ v = True
 tumblr_presets = dict()
 tumblr_presets['width'] = 350
 tumblr_presets['fps'] = 10
-tumblr_presets['text_x'] = 10
-tumblr_presets['text_y'] = 225
 tumblr_presets['font_size'] = 15
 tumblr_presets['target_size'] = 2  # In MB
 

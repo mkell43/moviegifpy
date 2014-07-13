@@ -21,6 +21,20 @@ from moviegif import Video, spg, get_size_mb, avg_time
 
 '''
 
+
+def load_presets(settings, preset):
+
+    kwargs = dict()  # Prevents an annoying warning.
+    if preset == 'tumblr':
+        from presets import tumblr_presets
+        kwargs = tumblr_presets
+
+    kwargs['text'] = settings['text']
+    kwargs['build'] = settings['build']
+    kwargs['decrement'] = settings['decrement']
+
+    return kwargs
+
 @arg('video_file', help='Path to video file.')
 @arg('-p', '--preset', choices=['tumblr', 'imgur'], help='Preset settings type to use.')
 @arg('-t', '--text', help='Text string to overlay on created gifs.')
@@ -30,6 +44,9 @@ from moviegif import Video, spg, get_size_mb, avg_time
 @arg('--build', help='Directory to build and output the gifs to.', default='./build')
 @arg('--decrement', help='Time, in seconds, to decrement from gif length when retrying gif creation', default=0.3)
 def run(video_file, **kwargs):
+
+    if kwargs['preset'] is not None:
+        kwargs = load_presets(kwargs, kwargs['preset'])
     
     # Create our video object to work with.
     video = Video(video_file, kwargs['width'])
