@@ -3,7 +3,7 @@ from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
 
 import os
 import glob
-import sys
+
 
 class Video(object):
 
@@ -31,7 +31,6 @@ class Video(object):
         self.width = width
         self.height = float(video_info['video_size'][1]) / float(video_info['video_size'][0]) * width
 
-
     def overlay(self, video_clip, text, **kwargs):
         '''
             Creates and returns the text overlay for the video / gifs.
@@ -56,7 +55,6 @@ class Video(object):
         return TextClip(text, fontsize=font_size, color='white', font='Helvetica').\
                     set_pos((text_x,text_y)).set_duration(video_clip.duration)
 
-
     def build_gif(self, start_time, end_time, build_dir=None, fps=None, text=None):
         '''
             Creates a gif image.  Returns the new gif's file name.
@@ -73,7 +71,7 @@ class Video(object):
             gif_name = gif_name + '_' + str(start_time) + '_' + str(end_time) + '.gif'
 
         # Get the subclip.
-        video_clip = self.video.subclip((start_time),(end_time))
+        video_clip = self.video.subclip(start_time,end_time)
 
         if text is not None:
             # Create the overlay
@@ -83,10 +81,10 @@ class Video(object):
             composite_clip = CompositeVideoClip([video_clip, overlay])
 
             # Create the gif.
-            composite_clip.to_gif(gif_name, fps=fps, fuzz=2)
+            composite_clip.to_gif(gif_name, fps=fps, fuzz=2, verbose=False)
         else:
             # Create the gif.
-            video_clip.to_gif(gif_name, fps=fps, fuzz=2)
+            video_clip.to_gif(gif_name, fps=fps, fuzz=2, verbose=False)
 
         return gif_name
 

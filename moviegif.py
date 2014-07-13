@@ -5,17 +5,13 @@ import argh
 from argh import arg
 import datetime
 
-from settings import settings
 from moviegif import Video, spg, get_size_mb, avg_time
 
 '''
 
-    DONE :: Add text overlays to images.
-    DONE :: Add autosetting of FPS when creating gifs.
-    TODO :: Add switches to set FPS when creating gifs.
-    DONE :: Update while loop to grab last few seconds.
+    TODO :: Update while loop to grab last few seconds.
     TODO :: Add switch to use gifsicle.
-    DONE :: Look into using averages for pull times
+    TODO :: Look into using averages for pull times / different methods for creating the gifs
     TODO :: Add using averages for pull times as option.
     TODO :: Look into using more accurate get_spg function that makes a test gif instead of just a single image.
     TODO :: Add switch to do super fast.  Ignores checks on file size and sends jobs to workers to create the gifs.
@@ -29,8 +25,10 @@ from moviegif import Video, spg, get_size_mb, avg_time
 @arg('-p', '--preset', choices=['tumblr', 'imgur'], help='Preset settings type to use.')
 @arg('-t', '--text', help='Text string to overlay on created gifs.')
 @arg('-x', '--targetsize', help='Max size, in MB, to make the created gifs.', default=2)
-@arg('-w', '--width', help='Width, in px, to resize the created gifs to.', default='350')
+@arg('-w', '--width', help='Width, in px, to resize the created gifs to.', default=350)
 @arg('--fps', help='FPS to use when creating the gifs.', default=10)
+@arg('--build', help='Directory to build and output the gifs to.', default='./build')
+@arg('--decrement', help='Time, in seconds, to decrement from gif length when retrying gif creation', default=0.3)
 def run(video_file, **kwargs):
     
     # Create our video object to work with.
@@ -51,9 +49,9 @@ def run(video_file, **kwargs):
         
         # Create gif.  Returns gif_name for checking later.
         gif_name = video.build_gif(start_time, end_time,
-                                   build_dir=settings['build_dir'],
-                                   fps=settings['fps'],
-                                   text=settings['overlay_text'])
+                                   build_dir=kwargs['build'],
+                                   fps=kwargs['fps'],
+                                   text=kwargs['text'])
         
         file_size = get_size_mb(gif_name)
         
@@ -61,16 +59,16 @@ def run(video_file, **kwargs):
         # If this is the second attempt, use the seconds_per_gif setting - the average
         #   gif run time.  If it's the 3rd or greater pass, use the decrement stated in
         #   the settings.
-        while file_size > settings['target_size']:
+        while file_size > kwargs['targetsize']:
             
             attempt += 1
 
             # Decrement end time            
             if attempt == 2:
-                decrement = float(seconds_per_gif - avg_time(settings['build_dir']))
+                decrement = float(seconds_per_gif - avg_time(kwargs['build']))
                 end_time = end_time - decrement
             if attempt > 2:
-                end_time = end_time - settings['decrement']
+                end_time = end_time - kwargs['decrement']
             with open('log', 'a') as f:
                 f.write(str(datetime.datetime.now()) + ' :: ' + 'REMOVED' + ' :: ' + gif_name + '\n')
             # Remove old gif.
@@ -78,9 +76,9 @@ def run(video_file, **kwargs):
             
             # Recreate gif.
             gif_name = video.build_gif(start_time, end_time,
-                                       build_dir=settings['build_dir'],
-                                       fps=settings['fps'],
-                                       text=settings['overlay_text'])
+                                       build_dir=kwargs['build'],
+                                       fps=kwargs['fps'],
+                                       text=kwargs['text'])
             
             # Test gif's size again.
             file_size = get_size_mb(gif_name)
